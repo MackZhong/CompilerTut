@@ -21,24 +21,12 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Token.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="LexicalAnalysis.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Lexer.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Token.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="LexicalAnalysis.cpp">
+    <ClCompile Include="Str2Value.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
