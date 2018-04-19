@@ -2,13 +2,13 @@
 #include "Token.h"
 
 
-Token::Token(TokenType type, std::string& value)
+Token::Token(TokenType type, const std::string& value)
 	:m_Type(type)
 	, m_Value(TypeedValue(value, type))
 {
 }
 
-std::string Token::TypeedValue(std::string& value, TokenType type) {
+std::string Token::TypeedValue(const std::string& value, TokenType type) {
 	switch (type)
 	{
 	case TokenType::ANNO:

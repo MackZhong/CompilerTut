@@ -19,11 +19,11 @@ LexicalAnalysis::~LexicalAnalysis()
 {
 }
 
-std::unique_ptr<Token> LexicalAnalysis::Next() {
-
+TokenPtr LexicalAnalysis::Next() throw() {
+	return nullptr;
 }
 
-void LexicalAnalysis::Read(char ch) throw(LexicalException)
+void LexicalAnalysis::Read(char ch) throw(...)
 {
 	bool movenext = true;
 	Token::TokenType type = Token::TokenType::NONE;
@@ -103,7 +103,7 @@ void LexicalAnalysis::Read(char ch) throw(LexicalException)
 		}
 		else {
 			m_Buffer << ch;
-			if (m_Buffer[1] == ch) {
+			if (m_Buffer.str()[0] == ch) {
 				type = Token::TokenType::STRI;
 				m_State = LexState::NORMAL;
 			}
@@ -119,7 +119,7 @@ void LexicalAnalysis::Read(char ch) throw(LexicalException)
 		}
 		else {
 			m_Buffer << ch;
-			if (m_Buffer[1] == ch) {
+			if (m_Buffer.str()[0] == ch) {
 				type = Token::TokenType::STRI;
 				m_State = LexState::NORMAL;
 			}

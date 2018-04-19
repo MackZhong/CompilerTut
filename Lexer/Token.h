@@ -20,11 +20,11 @@ class Token
 	enum TokenType m_Type;
 	std::string m_Value;
 
-	std::string TypeedValue(std::string& value, TokenType type);
+	std::string TypeedValue(const std::string& value, TokenType type);
 
 public:
-	Token( TokenType type, std::string& value);
+	Token( TokenType type, const std::string& value);
 	~Token();
 };
 
-using TokenPtr = std::unique_ptr<Token>;
+using TokenPtr = std::shared_ptr<Token>;

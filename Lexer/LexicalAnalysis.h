@@ -43,7 +43,7 @@ class LexicalAnalysis
 		TokenPtr token = std::make_unique<Token>(type, value);
 		m_Tokens.push_back(token);
 	}
-	void Read(char ch) throw(LexicalException);
+	void Read(char ch) throw(...);
 	char NextChar() const {
 		if (m_Start + m_Position + 1 < m_End)
 			return m_Start[m_Position + 1];
@@ -59,7 +59,7 @@ class LexicalAnalysis
 
 public:
 	LexicalAnalysis(const char* start, const char* end);
-	TokenPtr Next() throw (LexicalException);
+	TokenPtr Next() throw ();
 	~LexicalAnalysis();
 };
 
