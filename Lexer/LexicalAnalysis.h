@@ -35,11 +35,11 @@ class LexicalAnalysis
 	std::vector<TokenPtr> m_Tokens;
 	std::stringstream m_Buffer;
 
-	void AddToken(Token::TokenType type) {
+	void AddToken(Token::Type type) {
 		AddToken(type, m_Buffer.str());
 		m_Buffer.str("");
 	}
-	void AddToken(Token::TokenType type, const std::string& value) {
+	void AddToken(Token::Type type, const std::string& value) {
 		TokenPtr token = std::make_unique<Token>(type, value);
 		m_Tokens.push_back(token);
 	}

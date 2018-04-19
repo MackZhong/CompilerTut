@@ -26,10 +26,10 @@ TokenPtr LexicalAnalysis::Next() throw() {
 void LexicalAnalysis::Read(char ch) throw(...)
 {
 	bool movenext = true;
-	Token::TokenType type = Token::TokenType::NONE;
+	Token::Type type = Token::Type::NONE;
 
 	if (m_Start + m_Position >= m_End) {
-		type = Token::TokenType::ENDS;
+		type = Token::Type::ENDS;
 		movenext = false;
 		return;
 	}
@@ -58,7 +58,7 @@ void LexicalAnalysis::Read(char ch) throw(...)
 			movenext = false;
 		}
 		else if ('\n' == ch) {
-			type = Token::TokenType::NEWL;
+			type = Token::Type::NEWL;
 			if (NextChar() == '\r') m_Position++;
 			m_Line++;
 			m_PosInLine = 0;
@@ -67,7 +67,7 @@ void LexicalAnalysis::Read(char ch) throw(...)
 			m_State = LexState::NORMAL;
 		}
 		else if (0 == ch) {
-			type = Token::TokenType::ENDS;
+			type = Token::Type::ENDS;
 		}
 		else if (isalpha(ch) || '_' == ch) {
 			m_State = LexState::IDENTIFIER;
@@ -104,7 +104,7 @@ void LexicalAnalysis::Read(char ch) throw(...)
 		else {
 			m_Buffer << ch;
 			if (m_Buffer.str()[0] == ch) {
-				type = Token::TokenType::STRI;
+				type = Token::Type::STRI;
 				m_State = LexState::NORMAL;
 			}
 		}
@@ -120,7 +120,7 @@ void LexicalAnalysis::Read(char ch) throw(...)
 		else {
 			m_Buffer << ch;
 			if (m_Buffer.str()[0] == ch) {
-				type = Token::TokenType::STRI;
+				type = Token::Type::STRI;
 				m_State = LexState::NORMAL;
 			}
 		}
@@ -130,14 +130,14 @@ void LexicalAnalysis::Read(char ch) throw(...)
 			m_Buffer << ch;
 		}
 		else {
-			type = Token::TokenType::SPAC;
+			type = Token::Type::SPAC;
 			m_State = LexState::NORMAL;
 			movenext = false;
 		}
 		break;
 	case LexState::ANNOTATION:
 		if ('\r' == ch || '\n' == ch) {
-			type = Token::TokenType::ANNO;
+			type = Token::Type::ANNO;
 			m_State = LexState::NORMAL;
 			movenext = false;
 		}
@@ -147,7 +147,7 @@ void LexicalAnalysis::Read(char ch) throw(...)
 		break;
 	}
 
-	if (Token::TokenType::NONE != type) {
+	if (Token::Type::NONE != type) {
 		AddToken(type);
 	}
 
