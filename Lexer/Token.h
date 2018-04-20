@@ -5,6 +5,8 @@ public:
 	enum struct Type {
 		NONE = 0,
 		KEYW = 0x4b455957,
+		OBJB = 0x4f424a42,
+		OBJE = 0x4f424a45,
 		NUMB = 0x4e554d42,
 		IDEN = 0x4944454e,
 		SIGN = 0x5349474e,
@@ -24,7 +26,22 @@ private:
 	friend std::ostream& operator<<(std::ostream& stm, const Token& me) {
 		char typeName[5] = { 0 };
 		memcpy(typeName, &me.m_Type, 4);
-		stm << "State: " << typeName << "; Value: " << me.m_Value.c_str() << "." << std::endl;
+		stm << "State: " << typeName << "; Value: ";
+		const char escaped[] = "\n\t\v\b\r\f\a";
+		const char escape[] = "ntvbrfa";
+		for (auto s = me.m_Value.begin(); s != me.m_Value.end(); s++) {
+			const char* find = strchr(escaped, *s);
+			if (find) {
+				stm << '\\' << (escape + (find - escaped))[0];
+			}
+			else if (' ' == *s) {
+				stm << "\\s";
+			}
+			else {
+				stm << *s;
+			}
+		}
+		stm << std::endl;
 		return stm;
 	};
 

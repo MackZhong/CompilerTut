@@ -95,30 +95,34 @@ class MowStateMachine : public IStateMachine
 	class StateInit :public IDfaState {
 		virtual const char* Name() override { return "StateInit"; }
 		virtual IDfaState* Process(IStateMachine * machine, IDfaReader* reader) override {
+			if (reader->End()) {
+				return MowStateMachine::STATE_END;
+			}
+
 			char ch = reader->Read();
+			machine->AddChar(ch);
 			if ('{' == ch) {
 				return MowStateMachine::OBJECT_BEGIN;
 			}
-			else if ('}' == ch) {
+			if ('}' == ch) {
 				return MowStateMachine::OBJECT_END;
 			}
-			else if ('\'' == ch || '\"' == ch) {
+			if ('\'' == ch || '\"' == ch) {
 				return MowStateMachine::STRING;
 			}
-			else if (';' == ch) {
+			if (';' == ch) {
 				return MowStateMachine::COMMENT;
 			}
-			else if (iscsymf(ch)) {
-				reader->Back();
+			if (iscsymf(ch)) {
 				return MowStateMachine::IDENTITY;
 			}
-			else if (isdigit(ch)) {
-				reader->Back();
+			if ('-' == ch || '+' == ch || isdigit(ch)) {
 				return MowStateMachine::NUMERIC;
 			}
-			else if (isspace(ch)) {
+			if (isspace(ch)) {
 				return MowStateMachine::SPACE;
 			}
+
 
 			return nullptr;
 		};
@@ -128,6 +132,7 @@ class MowStateMachine : public IStateMachine
 	class StateObjectBegin :public IDfaState {
 		virtual const char* Name() override { return "ObjectBegin"; }
 		virtual IDfaState* Process(IStateMachine * machine, IDfaReader* reader) override {
+			machine->AddToken(Token::Type::OBJB);
 			return MowStateMachine::STATE_INIT;
 		};
 	};
@@ -136,9 +141,10 @@ class MowStateMachine : public IStateMachine
 	class StateObjectEnd :public IDfaState {
 		virtual const char* Name() override { return "ObjectEnd"; }
 		virtual IDfaState* Process(IStateMachine * machine, IDfaReader* reader) override {
-			if (reader->End()) {
-				return MowStateMachine::STATE_END;
-			}
+			//if (reader->End()) {
+			//	return MowStateMachine::STATE_END;
+			//}
+			machine->AddToken(Token::Type::OBJE);
 
 			return MowStateMachine::STATE_INIT;
 		};
@@ -148,7 +154,12 @@ class MowStateMachine : public IStateMachine
 	class StateSpace :public IDfaState {
 		virtual const char* Name() override { return "Space"; }
 		virtual IDfaState* Process(IStateMachine * machine, IDfaReader* reader) override {
-			while (isspace(reader->Read()));
+			char ch = reader->Read();
+			while (isspace(ch)) {
+				machine->AddChar(ch);
+				ch = reader->Read();
+			}
+			machine->AddToken(Token::Type::SPAC);
 			reader->Back();
 
 			return MowStateMachine::STATE_INIT;
@@ -160,35 +171,31 @@ class MowStateMachine : public IStateMachine
 		virtual const char* Name() override { return "Identity"; }
 		virtual IDfaState* Process(IStateMachine * machine, IDfaReader* reader) override {
 			char ch = reader->Read();
-			while (iscsymf(ch)) {
+			while (iscsym(ch)) {
 				machine->AddChar(ch);
 				ch = reader->Read();
 			}
 			machine->AddToken(Token::Type::IDEN);
+			reader->Back();
 
-			if ('}' == ch) {
-				return MowStateMachine::OBJECT_END;
-			}
+			//if ('}' == ch) {
+			//	return MowStateMachine::OBJECT_END;
+			//}
 			return MowStateMachine::STATE_INIT;
 		};
 	};
 	static DFASTATE IDENTITY;
 
-	class StateMatrix3x4 :public StateIdentity {
-		virtual const char* Name() override { return "Matrix3x4"; }
-		virtual IDfaState* Process(IStateMachine * machine, IDfaReader* reader) override {
-			return nullptr;
-		};
-	};
-	static DFASTATE MATRIX3x4;
-
 	class StateString :public IDfaState {
 		virtual const char* Name() override { return "String"; }
 		virtual IDfaState* Process(IStateMachine * machine, IDfaReader* reader) override {
-			char quote = reader->PrevChar();
+			const char quote = reader->PrevChar();
 			char ch = reader->Read();
-			while (ch != quote && !reader->Endline()) {
+			while (!reader->Endline()) {
 				machine->AddChar(ch);
+
+				if (quote == ch)
+					break;
 				ch = reader->Read();
 			}
 			machine->AddToken(Token::Type::STRI);
@@ -197,6 +204,22 @@ class MowStateMachine : public IStateMachine
 		};
 	};
 	static DFASTATE STRING;
+
+	class StateOrientation :public StateIdentity {
+		virtual const char* Name() override { return "Orientation"; }
+		virtual IDfaState* Process(IStateMachine * machine, IDfaReader* reader) override {
+			return nullptr;
+		};
+	};
+	static DFASTATE ORIENTATION;
+
+	class StateMatrix34 :public StateIdentity {
+		virtual const char* Name() override { return "Matrix3x4"; }
+		virtual IDfaState* Process(IStateMachine * machine, IDfaReader* reader) override {
+			return nullptr;
+		};
+	};
+	static DFASTATE MATRIx34;
 
 	class StateComment :public IDfaState {
 		virtual const char* Name() override { return "Comment"; }
@@ -216,19 +239,22 @@ class MowStateMachine : public IStateMachine
 	class StateNumeric :public IDfaState {
 		virtual const char* Name() override { return "Numeric"; }
 		virtual IDfaState* Process(IStateMachine * machine, IDfaReader* reader) override {
+			char first = reader->PrevChar();
 			char ch = reader->Read();
-			bool isHex = ('0' == ch) && ('x' == reader->NextChar() || 'X' == reader->NextChar());
+			bool isHex = ('0' == first) && ('x' == ch || 'X' == ch);
 			bool hasDot = false;
 			while ((isHex && isxdigit(ch))
 				|| (!isHex && (isdigit(ch) || (!hasDot && '.' == ch) || (isdigit(reader->NextChar() && ('e' == ch || 'E' == ch)))))) {
 				machine->AddChar(ch);
 				ch = reader->Read();
 				if ('f' == ch || 'F' == ch) {
-					ch = reader->Read();
+					reader->Forward();
+
 					break;
 				}
 			}
 			machine->AddToken(Token::Type::NUMB);
+			reader->Back();
 
 			return MowStateMachine::STATE_INIT;
 		};
@@ -252,29 +278,59 @@ class MowStateMachine : public IStateMachine
 
 	void AddToken(Token::Type type) {
 		std::string value = m_Stream.str();
+			if (value.compare("Matrix34") == 0) {
+				m_State = m_State;
+			}
 		if (Token::Type::IDEN == type && IsKeyword(value)) {
 			type = Token::Type::KEYW;
-			if (value.compare("Matrix3x4") == 0) {
-				//m_State =
-			}
+			//else if (value.compare("Orientation") == 0) {
+			//	m_State = ORIENTATION;
+			//}
 		}
 		TokenPtr token = std::make_shared<Token>(type, value);
 		m_Tokens.push_back(token);
 		m_Stream.str("");
+		std::cout << *token << std::endl;
+
+		static int objLevel = 0;
+		if (Token::Type::OBJB == type) {
+			objLevel++;
+		}
+		else if (Token::Type::OBJE == type) {
+			objLevel--;
+			if (0 == objLevel) {
+				objLevel = 0;
+			}
+		}
 	}
 
-	bool IsKeyword(const std::string& word) {
+	bool IsKeyword(const std::string& word) const {
 		return false;
 	}
 
 public:
+	char Escape(char ch) const {
+		switch (ch) {
+		case 'b':
+			return '\b';
+		case 't':
+			return '\t';
+		case 'r':
+			return '\r';
+		case 'n':
+			return '\n';
+		case '\\':
+			return '\\';
+		};
+		return ch;
+	}
 	MowStateMachine() {
 		if (!STATE_INIT) STATE_INIT = new StateInit;
 		if (!STATE_END) STATE_END = new StateEnd;
 		if (!OBJECT_BEGIN) OBJECT_BEGIN = new StateObjectBegin;
 		if (!OBJECT_END) OBJECT_END = new StateObjectEnd;
 		if (!IDENTITY) IDENTITY = new StateIdentity;
-		if (!MATRIX3x4) MATRIX3x4 = new StateMatrix3x4;
+		if (!MATRIx34) MATRIx34 = new StateMatrix34;
 		if (!STRING) STRING = new StateString;
 		if (!COMMENT) COMMENT = new StateComment;
 		if (!NUMERIC) NUMERIC = new StateNumeric;
@@ -286,7 +342,7 @@ public:
 		if (OBJECT_BEGIN) delete OBJECT_BEGIN; OBJECT_BEGIN = nullptr;
 		if (OBJECT_END) delete OBJECT_END; OBJECT_END = nullptr;
 		if (IDENTITY) delete IDENTITY; IDENTITY = nullptr;
-		if (MATRIX3x4) delete MATRIX3x4; MATRIX3x4 = nullptr;
+		if (MATRIx34) delete MATRIx34; MATRIx34 = nullptr;
 		if (STRING) delete STRING; STRING = nullptr;
 		if (COMMENT) delete COMMENT; COMMENT = nullptr;
 		if (NUMERIC) delete NUMERIC; NUMERIC = nullptr;
@@ -328,7 +384,7 @@ DFASTATE MowStateMachine::STATE_END = nullptr;
 DFASTATE MowStateMachine::OBJECT_BEGIN = nullptr;
 DFASTATE MowStateMachine::OBJECT_END = nullptr;
 DFASTATE MowStateMachine::IDENTITY = nullptr;
-DFASTATE MowStateMachine::MATRIX3x4 = nullptr;
+DFASTATE MowStateMachine::MATRIx34 = nullptr;
 DFASTATE MowStateMachine::STRING = nullptr;
 DFASTATE MowStateMachine::COMMENT = nullptr;
 DFASTATE MowStateMachine::NUMERIC = nullptr;
