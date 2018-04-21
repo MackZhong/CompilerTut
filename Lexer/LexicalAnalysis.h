@@ -32,15 +32,15 @@ class LexicalAnalysis
 	int m_PosInLine;
 	int m_Position;
 	LexState m_State;
-	std::vector<TokenPtr> m_Tokens;
+	std::vector<MOW::TokenPtr> m_Tokens;
 	std::stringstream m_Buffer;
 
-	void AddToken(Token::Type type) {
+	void AddToken(MOW::Token::Type type) {
 		AddToken(type, m_Buffer.str());
 		m_Buffer.str("");
 	}
-	void AddToken(Token::Type type, const std::string& value) {
-		TokenPtr token = std::make_unique<Token>(type, value);
+	void AddToken(MOW::Token::Type type, const std::string& value) {
+		MOW::TokenPtr token = std::make_unique<MOW::Token>(type, value);
 		m_Tokens.push_back(token);
 	}
 	void Read(char ch) throw(...);
@@ -59,7 +59,7 @@ class LexicalAnalysis
 
 public:
 	LexicalAnalysis(const char* start, const char* end);
-	TokenPtr Next() throw ();
+	MOW::TokenPtr Next() throw ();
 	~LexicalAnalysis();
 };
 

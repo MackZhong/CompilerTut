@@ -33,7 +33,10 @@
     <ClInclude Include="MowLexer.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="MowPaser.h">
+    <ClInclude Include="Skeleton.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MowParser.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -45,6 +48,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="LexicalAnalysis.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MowParser.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -4,6 +4,8 @@
 // https://zhuanlan.zhihu.com/moskize
 // https://zhuanlan.zhihu.com/p/19879002
 
+using namespace MOW;
+
 LexicalAnalysis::LexicalAnalysis(const char* start, const char* end)
 	: m_Start(start)
 	, m_End(end)
