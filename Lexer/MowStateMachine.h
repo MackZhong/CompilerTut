@@ -278,9 +278,9 @@ class MowStateMachine : public IStateMachine
 
 	void AddToken(Token::Type type) {
 		std::string value = m_Stream.str();
-			if (value.compare("Matrix34") == 0) {
-				m_State = m_State;
-			}
+		if (value.compare("Matrix34") == 0) {
+			m_State = m_State;
+		}
 		if (Token::Type::IDEN == type && IsKeyword(value)) {
 			type = Token::Type::KEYW;
 			//else if (value.compare("Orientation") == 0) {

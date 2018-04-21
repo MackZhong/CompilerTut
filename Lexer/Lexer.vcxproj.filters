@@ -30,6 +30,12 @@
     <ClInclude Include="MowStateMachine.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="MowLexer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MowPaser.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

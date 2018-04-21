@@ -148,7 +148,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="LexicalAnalysis.h" />
+    <ClInclude Include="MowPaser.h" />
     <ClInclude Include="MowStateMachine.h" />
+    <ClInclude Include="MowLexer.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Token.h" />
